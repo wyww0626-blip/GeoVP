@@ -8,13 +8,13 @@
 
 **Point · Box · Free-form** &nbsp; | &nbsp; **Optical · SAR · Infrared**
 
-[Overview](#overview) · [Architecture](#architecture) · [GeoVP-650K](#geovp-650k) · [Results](#results) · [Release Status](#release-status) · [Citation](#citation)
+[Overview](#overview) · [Architecture](#architecture) · [GeoVP-650K](#geovp-650k) · [Results](#results) · [Getting Started](#getting-started) · [Citation](#citation)
 
 </div>
 
 GeoVP combines visual prompts with language instructions to understand user-selected regions in remote sensing imagery. A single framework connects global scene context, local region representations, and language reasoning across optical, synthetic aperture radar (SAR), and infrared images.
 
-**Release scope:** This public repository currently contains the GeoVP research overview and manuscript figures. The source-code release is in preparation. Model weights and GeoVP-650K annotations are not included. The results below are reported from the manuscript.
+**Release scope:** This repository presents the GeoVP research framework and a partial code snapshot. The paper-specific Region-aware Encoder, complete visual prompt input pipeline, trained GeoVP weights, and GeoVP-650K annotations are not included in this release. The results below are reported from the manuscript; this snapshot alone does not reproduce them.
 
 ![Overview of GeoVP: task formulation, overall framework, and GeoVP-650K construction pipeline.](assets/readme/geovp-overview.png)
 
@@ -95,9 +95,57 @@ AID is excluded from GeoVP-650K. UCMerced is evaluated across tasks because UCM-
 | Effective batch size | 64 |
 | Hardware | 8 NVIDIA A100 GPUs |
 
-## Release Status
+## Getting Started
 
-This release includes the paper overview, architecture figures, dataset summary, and reported experimental results. The source snapshot is being prepared for publication. The paper-specific Region-aware Encoder, complete visual prompt input pipeline, model weights, and training annotations are not available in this release.
+### Environment
+
+Use a Linux environment with NVIDIA GPUs and CUDA support. The distributed inference entry points use NCCL. From the repository root:
+
+```bash
+git clone https://github.com/wyww0626-blip/GeoVP.git
+cd GeoVP
+conda create -n geovp python=3.10 -y
+conda activate geovp
+pip install -r requirements.txt
+pip install -e .
+```
+
+The dependency file pins PyTorch 2.0.1, torchvision 0.15.2, and torchaudio 2.0.2 with a CUDA 11.7 package index. Model-specific dependencies and pretrained visual encoder assets must also be available for the selected model configuration.
+
+### Model checkpoints
+
+The loader expects a checkpoint directory containing the model weights, model configuration, metadata, and tokenizer. It supports `consolidated.*.pth` weights and probes `meta.json`, `config.json`, and the tokenizer files to determine how to instantiate the model. The model type named in the metadata must have a corresponding implementation in `accessory/model/LLM/`.
+
+Checkpoint weights and the full GeoVP-650K dataset are not bundled in this source tree. A public download URL is not specified here.
+
+### Multimodal chat entry point
+
+The existing image-and-text chat interface can be launched with a checkpoint compatible with an included model implementation:
+
+```bash
+python -m accessory.demos.multi_turn_mm \
+  --pretrained_path /path/to/compatible-checkpoint \
+  --gpu_ids 0 \
+  --dtype bf16
+```
+
+Replace `/path/to/compatible-checkpoint` with the actual checkpoint directory. If metadata or tokenizer files are stored separately, pass `--llama_type`, `--llama_config`, and `--tokenizer_path` explicitly. Multiple GPU IDs enable tensor-parallel inference.
+
+This command launches image-and-text chat. The paper's complete point, box, and free-form prompting workflow is not available in the current release. The current chat script launches Gradio with `share=True`, which creates a shareable link.
+
+### Code organization
+
+| Path | Purpose |
+| --- | --- |
+| [`accessory/model/`](accessory/model/) | Model definitions, tokenizer, and checkpoint loading |
+| [`accessory/data/`](accessory/data/) | Data readers, image transforms, and conversation formatting |
+| [`accessory/main_finetune.py`](accessory/main_finetune.py) | Fine-tuning entry point |
+| [`accessory/configs/`](accessory/configs/) | Model and data configuration files |
+| [`accessory/demos/`](accessory/demos/) | Interactive inference entry points |
+| [`accessory/eval_mm/`](accessory/eval_mm/) | Multimodal inference and evaluation utilities |
+| [`assets/readme/`](assets/readme/) | Figures extracted from the GeoVP manuscript |
+
+The training configuration above records the paper's experimental settings. Reproducing those experiments additionally requires the matching GeoVP model configuration, training annotations, checkpoints, and benchmark splits.
 
 ## Citation
 
