@@ -14,7 +14,7 @@
 
 GeoVP combines visual prompts with language instructions to understand user-selected regions in remote sensing imagery. A single framework connects global scene context, local region representations, and language reasoning across optical, synthetic aperture radar (SAR), and infrared images.
 
-**Release scope:** This public repository currently contains the GeoVP research overview and manuscript figures. Source-code publication is pending license-notice confirmation. Model weights and GeoVP-650K annotations are not included. The results below are reported from the manuscript.
+**Release scope:** This public repository currently contains the GeoVP research overview and manuscript figures. The source-code release is in preparation. Model weights and GeoVP-650K annotations are not included. The results below are reported from the manuscript.
 
 ![Overview of GeoVP: task formulation, overall framework, and GeoVP-650K construction pipeline.](assets/readme/geovp-overview.png)
 
